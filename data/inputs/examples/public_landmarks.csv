@@ -1,0 +1,5 @@
+id,latitude,longitude,street,city,state,zip,address
+phoenix_city_hall,33.4484,-112.0740,,,,,
+minneapolis_city_hall,,,350 S 5th St,Minneapolis,MN,55415,
+denver_city_county_bldg,,,,,,,"1437 Bannock St, Denver, CO 80202"
+honolulu_hale,21.3069,-157.8583,,,,,

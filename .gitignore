@@ -1,0 +1,18 @@
+# --- Confidentiality: never commit real facility inputs or anything derived from them ---
+data/inputs/private/*
+!data/inputs/private/README.md
+outputs/
+# Raw-response cache (reproducible from config; large). Archive it per release instead.
+data/cache/
+data/inputs/private
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+dist/
+build/
