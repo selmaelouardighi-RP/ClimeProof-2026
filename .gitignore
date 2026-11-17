@@ -16,3 +16,6 @@ venv/
 .ruff_cache/
 dist/
 build/
+
+# macOS
+.DS_Store
