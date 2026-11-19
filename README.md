@@ -82,11 +82,23 @@ January, and every value's `period` field states the exact years it used.
 PRISM is updated daily (ACIS currently serves data through yesterday). Because only complete
 calendar years are averaged, a partial year never skews an annual count.
 
-The NOAA 1991–2020 Normals are no longer used for record fields. They are the latest NOAA edition
-(the next is due around 2031), and they now appear only in `climeproof compare`, as a long-term
-reference next to the recent values. Daymet is also used there as an independent 1 km
-cross-check. Source details and known limitations: [docs/sources.md](docs/sources.md). The
-reasoning behind the first iteration's scope, and what comes next:
+### Data sources
+
+All sources are public and need no API key. How each is queried, and its known limitations:
+[docs/sources.md](docs/sources.md).
+
+| source | provides | coverage | used in |
+|---|---|---|---|
+| ACIS GridData: PRISM daily grid (~4 km) | heat and cold day counts, degree days, precipitation, heat-day trend, heat waves | CONUS | records |
+| ACIS StnData / MultiStnData: GHCN-Daily stations | record high and low, snowfall, snow-depth days | stations within 50 km | records |
+| CarbonPlan Open Climate Risk (30 m) | wildfire burn probability, risk to potential structures | CONUS | records |
+| U.S. Census Geocoder | address to coordinates and county FIPS | U.S. | records (location) |
+| NOAA NCEI U.S. Climate Normals 1991–2020 | long-term baseline for heat-day counts | stations within 50 km | `climeproof compare` only |
+| NASA/ORNL Daymet V4 (1 km) | independent cross-check of heat-day counts | North America, HI, PR | `climeproof compare` only |
+
+The NOAA Normals are the latest NOAA edition (the next is due around 2031), but they describe a
+period centred on ~2005, so they serve only as a long-term reference next to the recent values.
+The reasoning behind the first iteration's scope, and what comes next:
 [docs/iteration-1-plan.md](docs/iteration-1-plan.md).
 
 ## Data windows and traceability
@@ -136,7 +148,8 @@ docs/                         sources, limitations, plan
 3. Register the class in `providers/__init__.py`.
 4. Add offline tests with a `FakeHttp` handler (see `tests/test_providers.py`), and document the
    source and its limitations in `docs/sources.md`.
-5. Add the metric(s) to the [Current coverage](#current-coverage) table and update the count.
+5. Add the metric(s) to the [Current coverage](#current-coverage) table and update the count. A new
+   source also goes in the [Data sources](#data-sources) table.
 
 ## Data handling
 
