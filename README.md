@@ -8,26 +8,105 @@ work-scope schema has a value, status, and provenance. This is all deterministic
 
 ## Quick start
 
+### Install and setup
+
 Python ≥ 3.11. [uv](https://docs.astral.sh/uv/) is recommended (it gives a lockfile for
 reproducible installs); plain `pip` works too.
 
 ```bash
-uv venv && uv pip install -e ".[dev,wildfire]"     # or: python -m venv .venv && .venv/Scripts/pip install -e ".[dev,wildfire]"
+uv venv && uv pip install -e ".[dev,wildfire]"
+# or, with pip:
+python -m venv .venv && .venv/bin/pip install -e ".[dev,wildfire]"   # Windows: .venv\Scripts\pip
 ```
 
-```bash
-climeproof catalog --implemented                   # what is computed so far, and from where
-climeproof profile --lat 33.4484 --lon -112.0740   # one point -> JSON record on stdout
-climeproof profile "350 S 5th St, Minneapolis, MN 55415"
-climeproof batch data/inputs/examples/public_landmarks.csv --out-dir outputs/demo
-climeproof compare --lat 33.4484 --lon -112.0740   # cross-source QC for extreme-heat day counts
-pytest                                             # offline unit tests
-pytest -m live                                     # smoke test against the real APIs
-```
-
-`--offline` reruns from the raw-response cache only. `--refresh` ignores the cache and refetches.
 The `wildfire` extra (icechunk/xarray/zarr) is only needed for the Open Climate Risk fields;
 without it those fields come back as `ERROR` with an install hint.
+
+Then create a local `outputs/` folder for results:
+
+```bash
+mkdir -p outputs
+```
+
+`outputs/` is git-ignored, so it doesn't exist in a fresh clone, and `--out` / `--summary` don't
+create missing folders. Keeping results there also keeps them out of git (see
+[Data handling](#data-handling)).
+
+Every command has `--help`, e.g. `climeproof profile --help`.
+
+### 1. See what the pipeline covers
+
+```bash
+climeproof catalog --implemented    # metrics computed so far, with the provider for each
+climeproof catalog                  # every metric in the schema, including NOT_IMPLEMENTED ones
+```
+
+### 2. Profile one location
+
+The core command: one address or point in, one full JSON record out.
+
+```bash
+# by coordinates, record printed to stdout
+climeproof profile --lat 33.4484 --lon -112.0740
+
+# by address (geocoded with the U.S. Census Geocoder)
+climeproof profile "350 S 5th St, Minneapolis, MN 55415"
+
+# save the full record, plus the short client summary
+climeproof profile --lat 33.4484 --lon -112.0740 --out outputs/phoenix.json --summary outputs/phoenix_summary.json
+
+# rerun from cached responses only, with no network calls
+climeproof profile --lat 33.4484 --lon -112.0740 --offline
+
+# ignore the cache and refetch everything, with progress logging
+climeproof profile --lat 33.4484 --lon -112.0740 --refresh -v
+```
+
+| option | what it does |
+|---|---|
+| `--out FILE` | write the full record to a file instead of stdout |
+| `--summary FILE` | also write the short client summary |
+| `--offline` | use cached raw responses only; a missing response becomes an `ERROR` value |
+| `--refresh` | ignore the cache and refetch everything |
+| `--config FILE` | use a different `pipeline.toml` |
+| `-v` | log progress |
+
+`--offline` reproduces a run only on the day it was made: record highs and lows run through
+yesterday, so on a later day their request isn't in the cache.
+
+### 3. More commands
+
+**Many locations from a CSV.** Rows need an `id` plus coordinates (`latitude`, `longitude`),
+address parts (`street`, `city`, `state`, `zip`) or a one-line `address`; see
+`data/inputs/examples/public_landmarks.csv`. Writes the files described under [Output](#output).
+
+```bash
+climeproof batch data/inputs/examples/public_landmarks.csv --out-dir outputs/demo
+```
+
+`batch` also takes `--offline`, `--refresh`, `--config` and `-v`.
+
+**Client summaries from existing records**, without rerunning anything:
+
+```bash
+climeproof summarize outputs/phoenix.json --out outputs/phoenix_summary.json
+climeproof summarize outputs/demo/records.jsonl --out outputs/demo/summary.jsonl
+```
+
+**Cross-source check** of extreme-heat day counts (PRISM, NRCC grids, Daymet and NOAA Normals)
+at one point:
+
+```bash
+climeproof compare --lat 33.4484 --lon -112.0740
+```
+
+### 4. Tests
+
+```bash
+pytest              # offline unit tests (the default)
+pytest -m live      # smoke test against the real APIs
+ruff check src tests
+```
 
 ## Output
 
