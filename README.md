@@ -95,9 +95,10 @@ calendar years are averaged, a partial year never skews an annual count.
 PRISM has no snow, and record extremes need a long observed record, so these metrics use
 GHCN-Daily stations served by ACIS. For each location the pipeline:
 
-1. **Searches** a box reaching 60 km from the point in each direction.
-2. **Keeps stations within 50 km** of the point (great-circle distance).
-3. **Applies each metric's record rule**, then **takes the nearest station that passes**:
+1. **Finds every station within 50 km** of the point (great-circle distance). ACIS only accepts a
+   rectangular search box, so the pipeline requests a box reaching 60 km in each direction and
+   then drops anything farther than 50 km.
+2. **Applies each metric's record rule**, then **takes the nearest station that passes**:
    - **Record high / low:** the station's Tmax *and* Tmin records must each span at least 30 years
      and still be reporting in the last complete year. The span is first to last
      observation; gaps inside it aren't checked. Record high and low always come from the same
@@ -105,7 +106,7 @@ GHCN-Daily stations served by ACIS. For each location the pipeline:
    - **Snowfall / snow-depth days:** a year counts only if it has at most 15 missing days, and at
      least 90 % of the recent 15 years (14 of 15) must count. Snowfall and snow depth are checked
      separately, so they can come from different stations.
-4. **Returns `NO_DATA`** with a note if no station qualifies, rather than reaching farther.
+3. **Returns `NO_DATA`** with a note if no station qualifies, rather than reaching farther.
 
 Station elevation is not part of the rule. A station can be much higher or lower than the
 point; each value's provenance records the station's id, name, coordinates, elevation and
