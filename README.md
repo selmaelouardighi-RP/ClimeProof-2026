@@ -250,17 +250,10 @@ data/inputs/examples/         public example inputs (civic landmarks only)
 docs/                         sources, limitations, plan
 ```
 
-## Adding a source / metric
+## Contributing
 
-1. Add the metric(s) to `catalog.py` with `provider="<name>"` (bump `SCHEMA_VERSION` if it's new).
-2. Write `providers/<name>.py`: subclass `PointProvider` (one query per location) or `Provider`
-   (vectorised over the whole batch, for gridded stores) and return a `MetricValue` for every
-   metric you own. Use `NO_DATA`/`N/A` with a `note`, never omit a field.
-3. Register the class in `providers/__init__.py`.
-4. Add offline tests with a `FakeHttp` handler (see `tests/test_providers.py`), and document the
-   source and its limitations in `docs/sources.md`.
-5. Add the metric(s) to the [Current coverage](#current-coverage) table and update the count. A new
-   source also goes in the [Data sources](#data-sources) table.
+The git workflow, the checks to run before committing, how to add a source or metric, and when
+to bump versions are in [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Data handling
 
