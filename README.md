@@ -1,17 +1,8 @@
 # ClimeProof Geospatial Pipeline
 
-Given any U.S. address or coordinates, produce a **documented hazard-exposure record based on
-recent data**: one field per metric in the work-scope schema, each carrying its value, status and
-provenance (source, dataset version, retrieval time, the exact request, and a hash of the raw
-response).
-
-Deterministic data plumbing only: no LLM, model or agent layer.
-
-> **Confidentiality.** The pod develops and tests on **bulk public inputs only** (county sets,
-> national facility datasets, public landmarks). Never put a participating facility's name,
-> address or coordinates in this repo, an issue, a test, or a commit message. `data/inputs/private/`
-> and `outputs/` are git-ignored for ClimeProof's in-house runs. If you come across anything that
-> identifies a participant, flag it to ClimeProof and delete it.
+Given any U.S. address or coordinates, this tool produces a structured profile of its
+environmental-hazard exposure using recent data from public datasets. Each metric in the
+work-scope schema has a value, status, and provenance. This is all deterministic and repeatable.
 
 ---
 
@@ -144,3 +135,11 @@ docs/                         sources, limitations, plan
 3. Register the class in `providers/__init__.py`.
 4. Add offline tests with a `FakeHttp` handler (see `tests/test_providers.py`), and document the
    source and its limitations in `docs/sources.md`.
+
+## Data handling
+
+The pipeline is developed and tested on bulk public inputs only, such as county sets, national
+facility datasets and public landmarks. Participating facilities' names, addresses and
+coordinates never enter the repository. In-house runs read from `data/inputs/private/` and
+write to `outputs/`; both, along with the raw-response cache in `data/cache/`, are git-ignored.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the working rules.
