@@ -14,6 +14,7 @@ from .config import Settings
 from .http import CachedHttp
 from .providers import REGISTRY, Provider
 from .schema import SCHEMA_VERSION, HazardRecord, Location, MetricValue, RunInfo, Status
+from .summary import summarize
 
 log = logging.getLogger(__name__)
 
@@ -98,18 +99,24 @@ LONG_COLUMNS = [
 
 def write_outputs(records: list[HazardRecord], out_dir: str | Path) -> dict[str, Path]:
     """records.jsonl (full, nested provenance) + metrics_long.csv (one row per location x metric)
-    + metrics_wide.csv (one row per location, value columns only, for quick analysis)."""
+    + metrics_wide.csv (one row per location, value columns only, for quick analysis)
+    + summary.jsonl (short client view of each record, see summary.py)."""
     out = Path(out_dir)
     out.mkdir(parents=True, exist_ok=True)
     paths = {
         "jsonl": out / "records.jsonl",
         "long": out / "metrics_long.csv",
         "wide": out / "metrics_wide.csv",
+        "summary": out / "summary.jsonl",
     }
 
     with paths["jsonl"].open("w", encoding="utf-8") as f:
         for r in records:
             f.write(r.model_dump_json() + "\n")
+
+    with paths["summary"].open("w", encoding="utf-8") as f:
+        for r in records:
+            f.write(json.dumps(summarize(r), ensure_ascii=False) + "\n")
 
     with paths["long"].open("w", encoding="utf-8", newline="") as f:
         w = csv.DictWriter(f, fieldnames=LONG_COLUMNS)

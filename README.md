@@ -40,14 +40,23 @@ without it those fields come back as `ERROR` with an install hint.
 
 ## Output
 
-`batch` writes three files to the output folder:
+`batch` writes these files to the output folder:
 
 | file | contents |
 |---|---|
 | `records.jsonl` | one full record per location (nested provenance), the canonical output |
 | `metrics_long.csv` | one row per location × metric, with source/version/station/hash columns |
 | `metrics_wide.csv` | one row per location, one column per metric (value, or the status) |
+| `summary.jsonl` | one short client-facing summary per location (see below) |
 | `unplaced.csv` | rows that could not be geocoded, with the reason (only if any) |
+
+**Client summary.** `summary.jsonl` (or `profile --summary FILE` for one point) is derived from
+the full record and adds nothing to it. It drops `NOT_IMPLEMENTED` metrics, keeps `NO_DATA`,
+`N/A` and `ERROR` with their note, rounds values for reading, and cuts provenance down to a
+source key (listed once under `sources`) plus the station name, id and distance for
+station-based metrics. Requests, hashes and retrieval times stay in the full record.
+`climeproof summarize FILE` builds summaries from an existing `.json` / `records.jsonl` without
+rerunning anything.
 
 Every record contains **every** metric in [`catalog.py`](src/climeproof/catalog.py), in the same
 order, so records are directly comparable. Each value has one status:

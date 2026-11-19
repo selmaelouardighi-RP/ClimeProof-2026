@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import logging
 from datetime import UTC, datetime
 from pathlib import Path
@@ -15,7 +16,8 @@ from .geocode import geocode_one
 from .http import CachedHttp
 from .inputs import build_locations, read_rows
 from .pipeline import run, write_outputs
-from .schema import Location, Status
+from .schema import HazardRecord, Location, Status
+from .summary import summarize as summarize_record
 
 app = typer.Typer(
     add_completion=False,
@@ -62,6 +64,9 @@ def profile(
     out: Annotated[
         Path | None, typer.Option(help="Write JSON record here instead of stdout")
     ] = None,
+    summary: Annotated[
+        Path | None, typer.Option(help="Also write the short client summary JSON here")
+    ] = None,
     config: ConfigOpt = None,
     offline: OfflineOpt = False,
     refresh: RefreshOpt = False,
@@ -76,6 +81,36 @@ def profile(
         typer.echo(f"wrote {out}")
     else:
         typer.echo(text)
+    if summary:
+        obj = summarize_record(record)
+        summary.write_text(json.dumps(obj, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+        typer.echo(f"wrote {summary}", err=out is None)
+
+
+@app.command()
+def summarize(
+    record_file: Annotated[
+        Path, typer.Argument(help="Full record: profile .json, or batch records.jsonl")
+    ],
+    out: Annotated[Path | None, typer.Option(help="Write here instead of stdout")] = None,
+) -> None:
+    """Short client summary of existing full record(s). Reads files only, no network."""
+    text = record_file.read_text(encoding="utf-8")
+    if record_file.suffix == ".jsonl":
+        lines = [ln for ln in text.splitlines() if ln.strip()]
+        result = "".join(
+            json.dumps(summarize_record(HazardRecord.model_validate_json(ln)), ensure_ascii=False)
+            + "\n"
+            for ln in lines
+        )
+    else:
+        obj = summarize_record(HazardRecord.model_validate_json(text))
+        result = json.dumps(obj, indent=2, ensure_ascii=False) + "\n"
+    if out:
+        out.write_text(result, encoding="utf-8")
+        typer.echo(f"wrote {out}")
+    else:
+        typer.echo(result, nl=False)
 
 
 @app.command()
