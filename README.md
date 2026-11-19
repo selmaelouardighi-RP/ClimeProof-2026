@@ -16,7 +16,7 @@ uv venv && uv pip install -e ".[dev,wildfire]"     # or: python -m venv .venv &&
 ```
 
 ```bash
-climeproof catalog --implemented                   # what iteration 1 computes, and from where
+climeproof catalog --implemented                   # what is computed so far, and from where
 climeproof profile --lat 33.4484 --lon -112.0740   # one point -> JSON record on stdout
 climeproof profile "350 S 5th St, Minneapolis, MN 55415"
 climeproof batch data/inputs/examples/public_landmarks.csv --out-dir outputs/demo
@@ -60,10 +60,10 @@ order, so records are directly comparable. Each value has one status:
 | `NOT_IMPLEMENTED` | the pipeline doesn't compute this yet. Development-only; must be zero at handoff |
 | `ERROR` | a source failed for this location; `note` says why. Rerun, don't interpret |
 
-## Iteration 1 coverage
+## Current coverage
 
-20 of 77 catalog metrics are computed in iteration 1 (run `climeproof catalog`). Everything else
-is emitted as `NOT_IMPLEMENTED`.
+20 of 77 catalog metrics are computed so far. Everything else is emitted as `NOT_IMPLEMENTED`.
+`climeproof catalog --implemented` always lists the current set.
 
 **Climate metrics describe the recent climate**: the mean over the most recent 15 complete
 calendar years. For a run in October 2026 that's **2011–2025**. The window moves forward each
@@ -86,7 +86,8 @@ The NOAA 1991–2020 Normals are no longer used for record fields. They are the 
 (the next is due around 2031), and they now appear only in `climeproof compare`, as a long-term
 reference next to the recent values. Daymet is also used there as an independent 1 km
 cross-check. Source details and known limitations: [docs/sources.md](docs/sources.md). The
-reasoning behind this scope and what comes next: [docs/iteration-1-plan.md](docs/iteration-1-plan.md).
+reasoning behind the first iteration's scope, and what comes next:
+[docs/iteration-1-plan.md](docs/iteration-1-plan.md).
 
 ## Data windows and traceability
 
@@ -135,6 +136,7 @@ docs/                         sources, limitations, plan
 3. Register the class in `providers/__init__.py`.
 4. Add offline tests with a `FakeHttp` handler (see `tests/test_providers.py`), and document the
    source and its limitations in `docs/sources.md`.
+5. Add the metric(s) to the [Current coverage](#current-coverage) table and update the count.
 
 ## Data handling
 
