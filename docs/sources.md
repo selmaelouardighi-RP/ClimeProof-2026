@@ -1,6 +1,7 @@
 # Data sources: how each one is queried, and its known limitations
 
-Status as of iteration 1 (2026-10). All sources are public and need no API key.
+The sources the pipeline currently uses, kept up to date as sources are added (last reviewed
+2026-10). All sources are public and need no API key.
 
 **Data windows** (`config/pipeline.toml` → `periods`):
 - **Climate statistics** use the most recent 15 complete calendar years, ending last year. That's
@@ -8,7 +9,7 @@ Status as of iteration 1 (2026-10). All sources are public and need no API key.
 - **Trends** use the last 30 complete years (1996–2025).
 - **Record highs/lows** use each station's full record, through yesterday.
 
-## Used in iteration 1
+## Used in records
 
 ### ACIS (Applied Climate Information System): GridData, StnData, MultiStnData
 - **What:** RCC-ACIS web services.
@@ -94,7 +95,7 @@ Status as of iteration 1 (2026-10). All sources are public and need no API key.
 - **Limitations:** 365-day years (Dec 31 dropped in leap years). Interpolation smooths extremes.
   The newest year is added with a lag of several months.
 
-## Evaluated, deferred to a later iteration
+## Evaluated, deferred for now
 
 | source | why deferred | when it becomes worth it |
 |---|---|---|
