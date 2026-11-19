@@ -69,18 +69,49 @@ order, so records are directly comparable. Each value has one status:
 calendar years. For a run in October 2026 that's **2011–2025**. The window moves forward each
 January, and every value's `period` field states the exact years it used.
 
-| hazard | metrics | source and window |
-|---|---|---|
-| Heat | days ≥ 90 / 100 / 105 °F, cooling degree days, heat-wave events/yr | ACIS GridData, PRISM grid at the point, recent 15 yr |
-| Heat | trend in ≥ 100 °F days | same, over the last 30 yr (1996–2025), since a trend needs a longer record |
-| Heat / cold | record high, record low | ACIS StnData: nearest active station with ≥ 30 yr of record, full record **through yesterday** |
-| Cold | freeze days (≤ 32 °F), hard-freeze days (≤ 28 °F), days ≤ 0 °F, heating degree days | ACIS / PRISM, recent 15 yr |
-| Winter storm | annual snowfall, days with snow depth ≥ 1 in | ACIS MultiStnData: nearest station with a complete recent record |
-| Extreme precip | annual precip, days ≥ 1 in, mean annual max 1-day precip | ACIS / PRISM, recent 15 yr |
-| Wildfire | burn probability (≈2011, ≈2047), risk to potential structures | CarbonPlan Open Climate Risk (30 m, CONUS), the latest edition |
+Each metric comes from one of two kinds of data:
+
+- **Gridded:** a value at the exact point, read from a continuous grid. There's no station
+  distance involved.
+- **Station:** measured at a nearby weather station, chosen by the rules in
+  [How stations are chosen](#how-stations-are-chosen). Each value records which station it used.
+
+| hazard | metrics | data | source and window |
+|---|---|---|---|
+| Heat | days ≥ 90 / 100 / 105 °F, cooling degree days, heat-wave events/yr | gridded | PRISM (~4 km) via ACIS GridData, recent 15 yr |
+| Heat | trend in ≥ 100 °F days | gridded | PRISM via ACIS, last 30 yr (1996–2025), since a trend needs a longer record |
+| Heat | record high | station | ACIS StnData, station's full record **through yesterday** |
+| Cold | freeze days (≤ 32 °F), hard-freeze days (≤ 28 °F), days ≤ 0 °F, heating degree days | gridded | PRISM via ACIS, recent 15 yr |
+| Cold | record low | station | ACIS StnData, station's full record **through yesterday** |
+| Winter storm | annual snowfall, days with snow depth ≥ 1 in | station | ACIS MultiStnData, recent 15 yr |
+| Extreme precip | annual precip, days ≥ 1 in, mean annual max 1-day precip | gridded | PRISM via ACIS, recent 15 yr |
+| Wildfire | burn probability (≈2011, ≈2047), risk to potential structures | gridded (modelled) | CarbonPlan Open Climate Risk (30 m, CONUS), the latest edition |
 
 PRISM is updated daily (ACIS currently serves data through yesterday). Because only complete
 calendar years are averaged, a partial year never skews an annual count.
+
+### How stations are chosen
+
+PRISM has no snow, and record extremes need a long observed record, so these metrics use
+GHCN-Daily stations served by ACIS. For each location the pipeline:
+
+1. **Searches** a box reaching 60 km from the point in each direction.
+2. **Keeps stations within 50 km** of the point (great-circle distance).
+3. **Applies each metric's record rule**, then **takes the nearest station that passes**:
+   - **Record high / low:** the station's Tmax *and* Tmin records must each span at least 30 years
+     and still be reporting in the last complete year (currently 2025). The span is first to last
+     observation; gaps inside it aren't checked. Record high and low always come from the same
+     station.
+   - **Snowfall / snow-depth days:** a year counts only if it has at most 15 missing days, and at
+     least 90 % of the recent 15 years (14 of 15) must count. Snowfall and snow depth are checked
+     separately, so they can come from different stations.
+4. **Returns `NO_DATA`** with a note if no station qualifies, rather than reaching farther.
+
+Station elevation is not part of the rule. A station can be much higher or lower than the
+point; each value's provenance records the station's id, name, coordinates, elevation and
+distance, and the client summary shows its name, id and distance. The distances, record
+length and missing-day limit are set under `[acis]` in `config/pipeline.toml`, and the 90 %
+under `periods.min_year_coverage`.
 
 ### Data sources
 
