@@ -54,7 +54,8 @@ class Provider(ABC):
         note: str | None = None,
     ) -> MetricValue:
         if isinstance(value, float):
-            value = round(value, 6)
+            # + 0.0 turns -0.0 into 0.0 (e.g. ACIS "-0", or a tiny negative rounded to zero).
+            value = round(value, 6) + 0.0
         return MetricValue(
             status=Status.OK,
             value=value,

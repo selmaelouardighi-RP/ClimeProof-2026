@@ -1,4 +1,5 @@
 import json
+import math
 from datetime import date, timedelta
 
 import pytest
@@ -9,9 +10,10 @@ from climeproof.providers.acis import (
     AcisStationProvider,
     num,
 )
+from climeproof.providers.base import Provider
 from climeproof.providers.ncei_normals import fetch_normals, parse_value
 from climeproof.providers.open_climate_risk import OpenClimateRiskProvider
-from climeproof.schema import Location, Status
+from climeproof.schema import Location, Provenance, Status
 
 from .conftest import FakeHttp
 
@@ -25,6 +27,21 @@ def test_acis_value_parsing():
     assert num("T") == 0.0
     assert num("1.25A") == 1.25
     assert num(["122", "1990-06-26"]) == 122.0
+
+
+@pytest.mark.parametrize("raw", [num("-0"), -0.0, -1e-9])
+def test_ok_normalises_negative_zero(raw):
+    prov = Provenance(
+        source="s",
+        dataset="d",
+        dataset_version="v",
+        retrieved_at="2026-01-01T00:00:00Z",
+        request="r",
+        method="m",
+    )
+    mv = Provider.ok("cold.record_low_f", raw, prov)
+    assert mv.value == 0.0 and math.copysign(1.0, mv.value) == 1.0
+    assert '"value":0.0' in mv.model_dump_json()
 
 
 def _daily_rows(start: date, end: date):
