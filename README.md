@@ -66,7 +66,7 @@ order, so records are directly comparable. Each value has one status:
 `climeproof catalog --implemented` always lists the current set.
 
 **Climate metrics describe the recent climate**: the mean over the most recent 15 complete
-calendar years. For a run in October 2026 that's **2011–2025**. The window moves forward each
+calendar years. For a run in 2026 that's **2011–2025**. The window moves forward each
 January, and every value's `period` field states the exact years it used.
 
 Each metric comes from one of two kinds of data:
@@ -99,7 +99,7 @@ GHCN-Daily stations served by ACIS. For each location the pipeline:
 2. **Keeps stations within 50 km** of the point (great-circle distance).
 3. **Applies each metric's record rule**, then **takes the nearest station that passes**:
    - **Record high / low:** the station's Tmax *and* Tmin records must each span at least 30 years
-     and still be reporting in the last complete year (currently 2025). The span is first to last
+     and still be reporting in the last complete year. The span is first to last
      observation; gaps inside it aren't checked. Record high and low always come from the same
      station.
    - **Snowfall / snow-depth days:** a year counts only if it has at most 15 missing days, and at
